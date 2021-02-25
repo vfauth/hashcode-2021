@@ -29,21 +29,18 @@ def main():
     for car in cars:
         for street in car:
             incoming_streets[street]+=1
-    
+
     schedule = dict()
     for dest in adj:
         nb_incoming_cars=0
         for origin in adj[dest]:
             nb_incoming_cars += incoming_streets[adj[dest][origin][0]]
-        
+
         if nb_incoming_cars !=0:
             schedule[dest]=dict()
             for origin in adj[dest]:
                 schedule[dest][adj[dest][origin][0]] = math.ceil(incoming_streets[adj[dest][origin][0]]/nb_incoming_cars*light_rotation)
-    
-    # print(schedule)
 
-            
     output(schedule)
 
 
