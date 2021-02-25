@@ -29,16 +29,19 @@ def main():
 
         schedule = dict()
         for dest in adj:
-            nb_incoming_cars=0
+            total_intersec_incoming_cars=0
             for origin in adj[dest]:
-                nb_incoming_cars += incoming_streets[adj[dest][origin][0]]
+                total_intersec_incoming_cars += incoming_streets[adj[dest][origin][0]]
 
-            if nb_incoming_cars !=0:
-                schedule[dest]=dict()
+            if total_intersec_incoming_cars !=0:
+                schedule[dest] = []
                 for origin in adj[dest]:
-                    if incoming_streets[adj[dest][origin][0]] != 0:
-                        schedule[dest][adj[dest][origin][0]] = math.ceil(incoming_streets[adj[dest][origin][0]]/nb_incoming_cars*light_rotation)
+                    incoming_cars = incoming_streets[adj[dest][origin][0]]
+                    if incoming_cars != 0:
+                        schedule[dest].append((adj[dest][origin][0], math.ceil(incoming_cars/total_intersec_incoming_cars*light_rotation)))
 
+        for dest in schedule:
+            schedule[dest].sort(key=lambda x: x[1], reverse=True)
         write_output(f"outputs/{dataset}.txt", schedule)
 
 
@@ -78,16 +81,16 @@ def parse_file(path):
         return duration, nb_intersec, bonus_score, adj, streets, cars
 
 def write_output(path, dict_data):
+    # Input: {intersec_id: [(street_name, duration)]}
     with open(path, 'w') as f:
         nb_keys = len(dict_data.keys())
         out = str(nb_keys) + '\n'
-        for iterationID in dict_data.keys():
-            out += str(iterationID) + '\n'
-            nb_road_for_intersection = len(dict_data[iterationID])
-            out += str(nb_road_for_intersection) + '\n'
-            for street in dict_data[iterationID]:
-                out += street + ' '  # street name
-                out += str(dict_data[iterationID][street])   # light duration for street
+        for intersec_id in dict_data.keys():
+            out += str(intersec_id) + '\n'
+            out += str(len(dict_data[intersec_id])) + '\n'
+            for street in dict_data[intersec_id]:
+                out += street[0] + ' '  # street name
+                out += str(street[1])   # light duration for street
                 out += '\n'
         f.write(out)
 
