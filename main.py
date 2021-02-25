@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 import math
 
 def main():
-    for dataset in ("a", "b", "c", "d", "e", "f"):
+    # for dataset in ("a", "b", "c", "d", "e", "f"):
+    for dataset in ("e"):
         duration, nb_intersec, bonus_score, adj, streets, cars = parse_file(f"inputs/{dataset}.txt")
 
         path_duration = []
-        light_rotation = min(20, duration)
+        light_rotation = min(5, duration)
 
         for index, car in enumerate(cars):
             sum_street = 0
@@ -27,9 +28,20 @@ def main():
             for street in car:
                 incoming_streets[street]+=1
 
+        # plt.hist([incoming_streets[name] for name,street in streets.items() if street[1]==499])
+        # plt.show()
+
+        starting_cars = {}
+        for dest in adj:
+            starting_cars[dest] = {}
+            for origin in adj[dest]:
+                starting_cars[dest][origin] = 0
+        for car in cars:
+            starting_cars[streets[car[0]][1]][streets[car[0]][0]] += 1
+
         schedule = dict()
         for dest in adj:
-            total_intersec_incoming_cars=0
+            total_intersec_incoming_cars = 0 # Total number of cars
             for origin in adj[dest]:
                 total_intersec_incoming_cars += incoming_streets[adj[dest][origin][0]]
 
@@ -37,8 +49,7 @@ def main():
                 schedule[dest] = []
                 for origin in adj[dest]:
                     incoming_cars = incoming_streets[adj[dest][origin][0]]
-                    if incoming_cars != 0:
-                        schedule[dest].append((adj[dest][origin][0], math.ceil(incoming_cars/total_intersec_incoming_cars*light_rotation)))
+                    schedule[dest].append((adj[dest][origin][0], min(max(starting_cars[dest][origin], 1), duration)))
 
         for dest in schedule:
             schedule[dest].sort(key=lambda x: x[1], reverse=True)
