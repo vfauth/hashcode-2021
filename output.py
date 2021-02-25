@@ -15,7 +15,7 @@ def output(dict_data):
         out += str(nb_road_for_intersection) + '\n'
         for street in dict_data[iterationID]:
             out += str(street[0]) + ' '  # street name
-            out += str(street[1]) + ' '  # street name
+            out += str(street[1])   # street name
             out += '\n'
     f.write(out)
     f.close()
