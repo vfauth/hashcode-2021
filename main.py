@@ -31,13 +31,34 @@ def main():
         # plt.hist([incoming_streets[name] for name,street in streets.items() if street[1]==499])
         # plt.show()
 
-        starting_cars = {}
+        # starting_cars = {}
+        # for dest in adj:
+        #     starting_cars[dest] = {}
+        #     for origin in adj[dest]:
+        #         starting_cars[dest][origin] = 0
+        # for car in cars:
+        #     starting_cars[streets[car[0]][1]][streets[car[0]][0]] += 1
+
+        when_will_cars_come = dict()
         for dest in adj:
-            starting_cars[dest] = {}
+            when_will_cars_come[dest] = {}
             for origin in adj[dest]:
-                starting_cars[dest][origin] = 0
+                when_will_cars_come[dest][origin] = []
         for car in cars:
-            starting_cars[streets[car[0]][1]][streets[car[0]][0]] += 1
+            position = 0
+            when_will_cars_come[streets[car[0]][1]][streets[car[0]][0]].append(position)
+            for street in car[1:]:
+                origin, dest, length = streets[street]
+                position += length
+                when_will_cars_come[dest][origin].append(position)
+
+        for dest in when_will_cars_come:
+            for origin in when_will_cars_come[dest]:
+                if len(when_will_cars_come[dest][origin])>0:
+                    when_will_cars_come[dest][origin] = int(np.std(when_will_cars_come[dest][origin]))
+                else:
+                    when_will_cars_come[dest][origin] = 1
+
 
         schedule = dict()
         for dest in adj:
@@ -49,7 +70,7 @@ def main():
                 schedule[dest] = []
                 for origin in adj[dest]:
                     incoming_cars = incoming_streets[adj[dest][origin][0]]
-                    schedule[dest].append((adj[dest][origin][0], min(max(starting_cars[dest][origin], 1), duration)))
+                    schedule[dest].append((adj[dest][origin][0], min(max(when_will_cars_come[dest][origin], 1), duration)))
 
         for dest in schedule:
             schedule[dest].sort(key=lambda x: x[1], reverse=True)
@@ -86,7 +107,6 @@ def parse_file(path):
         for i in range(nb_cars):
             car = f.readline().replace('\n', '').split(" ")
             cars.append(car[1:])
-
 
 
         return duration, nb_intersec, bonus_score, adj, streets, cars
