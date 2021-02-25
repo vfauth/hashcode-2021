@@ -39,7 +39,8 @@ def main():
         if nb_incoming_cars !=0:
             schedule[dest]=dict()
             for origin in adj[dest]:
-                schedule[dest][adj[dest][origin][0]] = math.ceil(incoming_streets[adj[dest][origin][0]]/nb_incoming_cars*light_rotation)
+                if incoming_streets[adj[dest][origin][0]] != 0:
+                    schedule[dest][adj[dest][origin][0]] = math.ceil(incoming_streets[adj[dest][origin][0]]/nb_incoming_cars*light_rotation)
 
     output(schedule)
 
