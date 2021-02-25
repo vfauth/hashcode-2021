@@ -1,24 +1,50 @@
 #!/bin/python3
 import numpy as np
+import matplotlib.pyplot as plt
+import math
 
 def main():
     #print(parse_file("inputs/a.txt"))
 
     duration, nb_intersec, adj, streets, cars = parse_file("inputs/b.txt")
-    print(streets)
+    # print(streets)
 
     path_duration = []
+    light_rotation = 20
 
     for index, car in enumerate(cars):
-        print(car)
+        # print(car)
         sum_street = 0
         for street in car[1:]:
             sum_street += streets[street][2]
 
         path_duration.append(sum_street)
 
-    print(max(path_duration))
-    print(np.mean([len(i) for i in cars]))
+    # print(max(path_duration))
+    # print(np.mean([len(i) for i in cars]))
+    # plt.hist(path_duration, bins=50)
+    # plt.show()
+    incoming_streets = {i:0 for i in streets}
+
+    for car in cars:
+        for street in car:
+            incoming_streets[street]+=1
+    
+    schedule = dict()
+    for dest in adj:
+        nb_incoming_cars=0
+        for origin in adj[dest]:
+            nb_incoming_cars += incoming_streets[adj[dest][origin][0]]
+        
+        if nb_incoming_cars !=0:
+            schedule[dest]=dict()
+            for origin in adj[dest]:
+                schedule[dest][adj[dest][origin][0]] = math.ceil(incoming_streets[adj[dest][origin][0]]/nb_incoming_cars*light_rotation)
+    
+    # print(schedule)
+
+            
+    output(schedule)
 
 
 
@@ -40,9 +66,9 @@ def parse_file(path):
             street = f.readline().split(" ")
             origin = int(street[0])
             dest = int(street[1])
-            if origin not in adj:
-                adj[origin] = dict()
-            adj[origin][dest] = (street[2], int(street[3]))
+            if dest not in adj:
+                adj[dest] = dict()
+            adj[dest][origin] = (street[2], int(street[3]))
 
             streets[street[2]] = (origin, dest, int(street[3]))
 
@@ -56,6 +82,21 @@ def parse_file(path):
 
         return duration, nb_intersec, adj, streets, cars
 
+def output(dict_data):
+    f = open('output.txt', 'w')
+    nb_keys = len(dict_data.keys())
+    out = str(nb_keys) + '\n'
+    for iterationID in dict_data.keys():
+        out += str(iterationID) + '\n'
+        nb_road_for_intersection = len(dict_data[iterationID])
+        out += str(nb_road_for_intersection) + '\n'
+        for street in dict_data[iterationID]:
+            out += street + ' '  # street name
+            out += str(dict_data[iterationID][street])   # light duration for street
+            out += '\n'
+    f.write(out)
+    f.close()
 
+    return out
 
 main()
